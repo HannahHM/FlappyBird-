@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #game {
+            width: 800px;
+            height: 600px;
+            border: 1px solid #000;
+            background: url(images/sky.png);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #game .pipeD {
+            background: url(images/pipe1.png) top center;
+            position: absolute;
+        }
+
+        #game .pipeU {
+            background: url(images/pipe2.png) bottom center;
+            position: absolute;
+        }
+
+        #bird {
+            width: 34px;
+            height: 25px;
+            /*border-radius: 10px;*/
+            /*background-color: red;*/
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            background: url(images/birds.png) -8px -10px no-repeat;
+        }
+
+    </style>
+</head>
+<body>
+<div id="game">
+    <div id="bird"></div>
+</div>
+<script>
+    //让图片往左走
+    var game=document.getElementById("game");
+    var bird=document.getElementById("bird");
+    var gameX=0;
+    var speedY=0;
+    var g=1;
+    var gameover=false;
+    var timer=null;
+    timer=setInterval(function(){
+        //leader=leader+step
+        if(!gameover){
+            gameX=gameX-5;
+            game.style.backgroundPositionX=gameX+"px";//天空移动
+            speedY=speedY+g;
+            birdY=bird.offsetTop+speedY;
+            if(birdY<0){
+                birdY=0;
+                gameover=true;//小鸟碰到顶端，结束游戏
+                clearInterval(timer);
+            }
+            if(birdY>game.offsetHeight-bird.offsetHeight){
+                birdY=game.offsetHeight-bird.offsetHeight;
+                gameover=true;//小鸟碰到底端，结束游戏
+                clearInterval(timer);
+            }
+            bird.style.top=birdY+"px";//小鸟加速度下坠
+        }
+    },30);
+    document.onclick= function () {
+        speedY=-10;//点击鼠标小鸟上升
+    }
+    document.onkeydown=function(e){
+        if(e.keyCode===87){
+            speedY=-10;//W键小鸟上升
+        }
+    }
+    //批量随机创造管子
+    function pipe(positionX){
+        var timer=null;
+        var divUp=document.createElement("div");
+        divUp.className="pipeU";
+        divUp.style.width="52px";
+        divUpH=parseInt(Math.random()*175+100);
+        divUp.style.height=divUpH+"px";
+        divUp.style.top=0;
+        divUp.style.left=positionX+"px";
+        game.appendChild(divUp);
+        var divDown=document.createElement("div");
+        divDown.className="pipeD";
+        divDown.style.width="52px";
+        divDownH=game.offsetHeight-200-divUpH;
+        divDown.style.height=divDownH+"px";
+        divDown.style.bottom=0;
+        divDown.style.left=positionX+"px";
+        game.appendChild(divDown);
+        //移动管子
+        timer=setInterval(function () {
+            if(!gameover){//如果游戏没有结束就移动管子
+                positionX=positionX-5;//让管子移动
+                if(positionX<-52){
+                    positionX=800;//第一个会跳到最后，实现无间断出现管子
+                }
+                divUp.style.left=positionX+"px";
+                divDown.style.left=positionX+"px";
+                var downcrash=bird.offsetLeft+bird.offsetWidth>positionX&&
+                bird.offsetLeft+bird.offsetWidth<positionX+divDown.offsetWidth&&bird.offsetTop+bird.offsetHeight>
+                        divUpH+200;
+                var upcrash=bird.offsetLeft+bird.offsetWidth>positionX&&
+                bird.offsetLeft+bird.offsetWidth<positionX+divDown.offsetWidth&&bird.offsetTop<
+                        divUpH;
+                if(downcrash){
+                    gameover=true;
+                }
+                if(upcrash){
+                    gameover=true;
+                }
+            }else{
+                clearInterval(timer);
+            }
+        },30);
+    }
+    for(i=0;i<4;i++){
+        var Pipe=new pipe(400+i*200);
+    }
+</script>
+</body>
+</html>
